@@ -40,7 +40,6 @@ export const syncUserUpdation = inngest.createFunction(
             name: first_name + ' ' + last_name,
             email: email_addresses[0].email_address,
             imageUrl: image_url,
-            password: 'clerk_user',
         }
         await connectDB()
         await User.findByIdAndUpdate(id, userData)
