@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
     imageUrl: { type: String, required: true },
     cartItems: { type: Object, default: [] }, // can later change to [CartItemSchema]
     isAdmin: { type: Boolean, default: false }, // no need required:true
+    password: { type: String, required: false },
 }, { minimize: false });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
