@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.2",
+    "axios": "^1.12.2",
+    "cloudinary": "^2.7.0",
     "inngest": "^3.41.0",
     "mongoose": "^8.18.2",
     "next": "^15.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hot-toast": "^2.5.1",
+    "react-hot-toast": "^2.6.0",
     "serialize-error-cjs": "^0.2.0"
   },
   "devDependencies": {

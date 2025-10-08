@@ -7,31 +7,23 @@ if (!cached) {
 }
 
 async function connectDB() {
-    if (cached.conn) return cached.conn;
 
-    if (!cached.promise) {
-        const dbName = "mactech";
-        const uri = process.env.MONGODB_URI.includes("?")
-            ? `${process.env.MONGODB_URI}&dbName=${dbName}`
-            : `${process.env.MONGODB_URI}/${dbName}`;
-
-        const opts = {
-            bufferCommands: false,
-            maxPoolSize: 10,
-            serverSelectionTimeoutMS: 5000, // fail fast
-        };
-
-        cached.promise = mongoose.connect(uri, opts)
-            .then(mongoose => mongoose)
-            .catch(err => {
-                cached.promise = null; // reset so next call retries
-                console.error("❌ MongoDB connection failed:", err);
-                throw err;
-            });
+    if (cached.conn) {
+        return cached.conn
     }
 
-    cached.conn = await cached.promise;
-    return cached.conn;
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands:false
+        }
+
+        cached.promise = mongoose.connect(`${process.env.MONGODB_URI}/mactech`, opts).then(mongoose => {} )
+        return mongoose
+    }
+
+    cached.conn = await cached.promise
+    return cached.conn
+
 }
 
 export default connectDB;

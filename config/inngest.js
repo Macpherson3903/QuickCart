@@ -2,71 +2,88 @@ import { Inngest } from "inngest";
 import connectDB from "./db.js";
 import User from "@/models/User";
 
+// Create a client to send and receive eventd
 export const inngest = new Inngest({ id: "mactech-next" });
 
+// Inngest Function to save User data to a database
 export const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
   { event: "clerk/user.created" },
-  async ({ event, step }) => {
-    console.log("Received user.created event:", JSON.stringify(event, null, 2));
+  async ({ event }) => {
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
-    try {
-      await connectDB();
-      const { id, first_name, last_name, email_addresses, image_url } = event.data;
-      const userData = {
-        _id: id,
-        email: email_addresses?.[0]?.email_address || "",
-        name: `${first_name || ""} ${last_name || ""}`.trim(),
-        imageUrl: image_url,
-      };
+    const userData = {
+      _id: id,
+      email: email_addresses?.[0]?.email_address || "",
+      name: [first_name, last_name].filter(Boolean).join(" "),
+      imageUrl: image_url || "",
+    };
 
-      await User.create(userData);
-      console.log("✅ User created:", userData);
-    } catch (error) {
-      console.error("❌ Error creating user:", error);
-      throw error;
-    }
+    await connectDB();
+    await User.create(userData);
   }
 );
 
+// Inngest function to update user data in database
 export const syncUserUpdation = inngest.createFunction(
-  { id: "update-user-from-clerk" },
-  { event: "clerk/user.updated" },
-  async ({ event }) => {
-    console.log("Received user.updated event:", JSON.stringify(event, null, 2));
-
-    try {
-      await connectDB();
-      const { id, first_name, last_name, email_addresses, image_url } = event.data;
-      const userData = {
-        name: `${first_name || ""} ${last_name || ""}`.trim(),
-        email: email_addresses?.[0]?.email_address || "",
-        imageUrl: image_url,
-      };
-
-      await User.findByIdAndUpdate(id, userData, { new: true, upsert: true });
-      console.log("✅ User updated:", id);
-    } catch (error) {
-      console.error("❌ Error updating user:", error);
-      throw error;
+  {
+    id: 'update-user-from-clerk'
+  },
+  { event: 'cler/user.updated' },
+  async ({event}) => {
+    const { id, first_name, last_name, email_addresses, image_url } = event.data
+    const userData = {
+      _id: id,
+      email: email_addresses[0].email_address || "",
+      name: [first_name, last_name].filter(Boolean).join(" "),
+      imageUrl: image_url
     }
+    await connectDB()
+    await User.findByIdAndUpdate(id,userData)
   }
-);
+)
 
-export const syncUserDeletion = inngest.createFunction(
-  { id: "delete-user-with-clerk" },
-  { event: "clerk/user.deleted" },
-  async ({ event }) => {
-    console.log("Received user.deleted event:", JSON.stringify(event, null, 2));
+// Inngest Function to delete user from database
+export const syncUserDeletion = inngest.deleteFunction(
+  {
+    id: 'delete-user-with-clerk'
+  },
+  { event: 'clerk/user.deleted' },
+  async ({event}) => {
+    const {id } = event.data
 
-    try {
-      await connectDB();
-      const { id } = event.data;
-      await User.findByIdAndDelete(id);
-      console.log("✅ User deleted:", id);
-    } catch (error) {
-      console.error("❌ Error deleting user:", error);
-      throw error;
+    await connectDB()
+    await User.findByIdAndDelete(id)
+  }
+)
+
+// Inngest Function to create user's order in database
+export const createUserOrder = inngest.createFunction(
+  {
+    id: 'create-user-order',
+    batchEvents: {
+      maxSize: 25,
+      timeout: '5s'
     }
+  },
+  { event: 'user/order.created' },
+  async ({events}) => {
+
+    const orders = eventss.map((event)=> {
+      return {
+        userId: event.date.userId,
+        items: event.data.items,
+        amount: event.data.amount,
+        address: event.data.address,
+        date: event.data.date
+      }
+    })
+
+    await connectDB(
+    await Order.insertMany(orders)
+
+    return ( success: true, processed: orders.lenth );
+    )
+
   }
-);
+)
