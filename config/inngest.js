@@ -30,7 +30,7 @@ export const syncUserUpdation = inngest.createFunction(
     id: 'update-user-from-clerk'
   },
   { event: 'cler/user.updated' },
-  async ({event}) => {
+  async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
     const userData = {
       _id: id,
@@ -39,7 +39,7 @@ export const syncUserUpdation = inngest.createFunction(
       imageUrl: image_url
     }
     await connectDB()
-    await User.findByIdAndUpdate(id,userData)
+    await User.findByIdAndUpdate(id, userData)
   }
 )
 
@@ -49,8 +49,8 @@ export const syncUserDeletion = inngest.deleteFunction(
     id: 'delete-user-with-clerk'
   },
   { event: 'clerk/user.deleted' },
-  async ({event}) => {
-    const {id } = event.data
+  async ({ event }) => {
+    const { id } = event.data
 
     await connectDB()
     await User.findByIdAndDelete(id)
@@ -67,9 +67,9 @@ export const createUserOrder = inngest.createFunction(
     }
   },
   { event: 'user/order.created' },
-  async ({events}) => {
+  async ({ events }) => {
 
-    const orders = eventss.map((event)=> {
+    const orders = eventss.map((event) => {
       return {
         userId: event.date.userId,
         items: event.data.items,
@@ -80,9 +80,9 @@ export const createUserOrder = inngest.createFunction(
     })
 
     await connectDB(
-    await Order.insertMany(orders)
+      await Order.insertMany(orders)
 
-    return ( success: true, processed: orders.length );
+    return { success: true, processed: orders.length };
     )
 
   }
