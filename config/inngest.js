@@ -1,6 +1,7 @@
 import { Inngest } from "inngest";
 import connectDB from "./db.js";
 import User from "@/models/User";
+import Order from "@/models/Order";
 
 // Create a client to send and receive eventd
 export const inngest = new Inngest({ id: "mactech-next" });
@@ -29,7 +30,7 @@ export const syncUserUpdation = inngest.createFunction(
   {
     id: 'update-user-from-clerk'
   },
-  { event: 'cler/user.updated' },
+  { event: 'clerk/user.updated' },
   async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data
     const userData = {
@@ -71,7 +72,7 @@ export const createUserOrder = inngest.createFunction(
 
     const orders = events.map((event) => {
       return {
-        userId: event.date.userId,
+        userId: event.data.userId,
         items: event.data.items,
         amount: event.data.amount,
         address: event.data.address,
