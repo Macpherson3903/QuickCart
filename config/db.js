@@ -7,23 +7,20 @@ if (!cached) {
 }
 
 async function connectDB() {
-
-    if (cached.conn) {
-        return cached.conn
-    }
+    if (cached.conn) return cached.conn;
 
     if (!cached.promise) {
         const opts = {
-            bufferCommands:false
-        }
+            bufferCommands: false,
+        };
 
-        cached.promise = mongoose.connect(`${process.env.MONGODB_URI}/mactech`, opts).then(mongoose => {} )
-        return mongoose
+        cached.promise = mongoose
+            .connect(`${process.env.MONGODB_URI}/mactech`, opts)
+            .then((mongoose) => mongoose); // ✅ return mongoose instance properly
     }
 
-    cached.conn = await cached.promise
-    return cached.conn
-
+    cached.conn = await cached.promise;
+    return cached.conn;
 }
 
 export default connectDB;
